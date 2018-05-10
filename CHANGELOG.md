@@ -1,6 +1,34 @@
 # Changelog of phpDox
 
-## phpDox 0.10.1 (2 Juli 2017)
+## phpDox 0.11.1 (7 May 2018)
+
+Note: 0.11.x is the last series of releases that supports running under PHP 5.x 
+
+### Fixed
+* [#332](https://github.com/theseer/phpdox/issues/332): PHPUnit Enricher: classnode is always null
+
+
+## phpDox 0.11.0 (10 January 2018)
+
+### Changed
+* Upgraded dependencies: Now using PHP-Parser 3.1+
+* The publicOnly mode now actually works
+
+### Merged
+* [#310](https://github.com/theseer/phpdox/pull/310): Make the build reproducible
+* [#319](https://github.com/theseer/phpdox/pull/319):Fixed: #315 count(): Parameter must be an array or an object that implements Countable
+
+### Fixed
+* [#320](https://github.com/theseer/phpdox/issues/320): Multiline annotation for class constants fails to add subsequent lines
+* [#315](https://github.com/theseer/phpdox/issues/315): count(): Parameter must be an array or an object that implements Countable (Thanks to @cristicotet, @swmarc)
+* [#313](https://github.com/theseer/phpdox/issues/313): Parsing of concatenated constants in classes fails
+* [#312](https://github.com/theseer/phpdox/issues/312): Alias for trait causes error
+* [#299](https://github.com/theseer/phpdox/issues/299): Run phpdox with a cloned repository on Windows
+* [#284](https://github.com/theseer/phpdox/issues/284): Error in Generator
+* [#242](https://github.com/theseer/phpdox/issues/242): Call to undefined method TheSeer\phpDox\Collector\ClassObject::addImplementor() 
+
+
+## phpDox 0.10.1 (2 July 2017)
 
 ### Changed
 * Added warning to output if PHP <7.0 is used
@@ -41,7 +69,7 @@
 * Fix: Issue #243 (Trait in Trait causes UnitObjectException if the nested trait is missing)
 * Fix: Issue #266 (Page Title "phpdox - Test Method")
 
-## phpDox 0.8.1.1 (09 Juli 2015)
+## phpDox 0.8.1.1 (09 July 2015)
 
 * Fix phar building, remove pear building target
 

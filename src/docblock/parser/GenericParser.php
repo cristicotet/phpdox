@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2010-2017 Arne Blankerts <arne@blankerts.de>
+ * Copyright (c) 2010-2018 Arne Blankerts <arne@blankerts.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -63,8 +63,9 @@ namespace TheSeer\phpDox\DocBlock {
         }
 
         public function getObject(array $buffer) {
-            $obj = $this->buildObject('generic', $buffer);
-            $obj->setValue($this->payload);
+            $this->payload .= ' ' . implode(' ', array_map('trim', $buffer));
+            $obj = $this->buildObject('generic', []);
+            $obj->setValue(trim($this->payload));
             return $obj;
         }
 

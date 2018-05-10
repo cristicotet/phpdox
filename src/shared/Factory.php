@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2010-2017 Arne Blankerts <arne@blankerts.de>
+ * Copyright (c) 2010-2018 Arne Blankerts <arne@blankerts.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -200,7 +200,8 @@ namespace TheSeer\phpDox {
                     $config->getWorkDirectory()
                 ),
                 $this->getBackendFactory()->getInstanceFor($config->getBackend()),
-                $config->getFileEncoding()
+                $config->getFileEncoding(),
+                $config->isPublicOnlyMode()
             );
         }
 
