@@ -44,7 +44,7 @@ namespace TheSeer\phpDox\Collector\Backend {
      */
     class CustomLexer extends Emulative {
 
-        public function getNextToken(&$value = NULL, &$startAttributes = NULL, &$endAttributes = NULL) {
+        public function getNextToken(&$value = NULL, &$startAttributes = NULL, &$endAttributes = NULL) : int {
             $tokenId = parent::getNextToken($value, $startAttributes, $endAttributes);
 
             if ($tokenId == Tokens::T_CONSTANT_ENCAPSED_STRING
