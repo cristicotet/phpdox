@@ -37,6 +37,8 @@
  */
 namespace TheSeer\phpDox {
 
+    use SebastianBergmann\Timer\Timer;
+
     /**
      * Shell output based logger
      */
@@ -128,7 +130,7 @@ namespace TheSeer\phpDox {
          */
         public function buildSummary() {
             echo "\n\n";
-            echo \PHP_Timer::resourceUsage();
+            echo Timer::resourceUsage();
             echo "\n\n";
         }
 
