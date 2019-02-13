@@ -1,183 +1,138 @@
-<?php
-/**
- * Copyright (c) 2010-2018 Arne Blankerts <arne@blankerts.de>
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- *   * Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *   * Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
- *
- *   * Neither the name of Arne Blankerts nor the names of contributors
- *     may be used to endorse or promote products derived from this software
- *     without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT  * NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER ORCONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
- * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- * @package    phpDox
- * @author     Arne Blankerts <arne@blankerts.de>
- * @copyright  Arne Blankerts <arne@blankerts.de>, All rights reserved.
- * @license    BSD License
- */
-namespace TheSeer\phpDox\Collector {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Collector;
 
-    use TheSeer\DirectoryScanner\DirectoryScanner;
-    use TheSeer\phpDox\FileInfo;
-    use TheSeer\phpDox\ProgressLogger;
-    use TheSeer\phpDox\Collector\Backend\BackendInterface;
-    use TheSeer\phpDox\Collector\Backend\ParseErrorException;
+use TheSeer\DirectoryScanner\DirectoryScanner;
+use TheSeer\phpDox\Collector\Backend\BackendInterface;
+use TheSeer\phpDox\Collector\Backend\ParseErrorException;
+use TheSeer\phpDox\FileInfo;
+use TheSeer\phpDox\ProgressLogger;
+
+/**
+ * Collector processing class
+ */
+class Collector {
+    /**
+     * @var ProgressLogger
+     */
+    private $logger;
 
     /**
-     * Collector processing class
+     * @var Project
      */
-    class Collector {
+    private $project;
 
-        /**
-         * @var ProgressLogger
-         */
-        private $logger;
+    /**
+     * @var array
+     */
+    private $parseErrors = [];
 
-        /**
-         * @var Project
-         */
-        private $project;
+    /**
+     * @var BackendInterface
+     */
+    private $backend;
 
-        /**
-         * @var array
-         */
-        private $parseErrors = array();
+    /**
+     * @var string
+     */
+    private $encoding;
 
-        /**
-         * @var BackendInterface
-         */
-        private $backend;
+    /**
+     * @var bool
+     */
+    private $publicOnly;
 
-        /**
-         * @var string
-         */
-        private $encoding;
+    /**
+     * @param string $encoding
+     * @param bool   $publicOnly
+     */
+    public function __construct(ProgressLogger $logger, Project $project, BackendInterface $backend, $encoding, $publicOnly) {
+        $this->logger     = $logger;
+        $this->project    = $project;
+        $this->backend    = $backend;
+        $this->encoding   = $encoding;
+        $this->publicOnly = $publicOnly;
+    }
 
-        /**
-         * @var bool
-         */
-        private $publicOnly;
+    public function run(DirectoryScanner $scanner): Project {
+        $srcDir = $this->project->getSourceDir();
+        $this->logger->log("Scanning directory '{$srcDir}' for files to process\n");
 
-        /**
-         * @param ProgressLogger   $logger
-         * @param Project          $project
-         * @param BackendInterface $backend
-         * @param string           $encoding
-         * @param bool             $publicOnly
-         */
-        public function __construct(ProgressLogger $logger, Project $project, BackendInterface $backend, $encoding, $publicOnly) {
-            $this->logger = $logger;
-            $this->project = $project;
-            $this->backend = $backend;
-            $this->encoding = $encoding;
-            $this->publicOnly = $publicOnly;
-        }
+        $iterator = new SourceFileIterator($scanner($srcDir), $srcDir, $this->encoding);
 
-        /**
-         * @param DirectoryScanner $scanner
-         *
-         * @return Project
-         */
-        public function run(DirectoryScanner $scanner) {
+        foreach ($iterator as $file) {
+            $needsProcessing = $this->project->addFile($file);
 
-            $srcDir = $this->project->getSourceDir();
-            $this->logger->log("Scanning directory '{$srcDir}' for files to process\n");
+            if (!$needsProcessing) {
+                $this->logger->progress('cached');
 
-            $iterator = new SourceFileIterator($scanner($srcDir), $srcDir, $this->encoding);
-            foreach($iterator as $file) {
-                $needsProcessing = $this->project->addFile($file);
-                if (!$needsProcessing) {
-                    $this->logger->progress('cached');
-                    continue;
-                }
-                if (!$this->processFile($file)) {
-                    $this->project->removeFile($file);
-                }
+                continue;
             }
-            $this->logger->completed();
-            return $this->project;
+
+            if (!$this->processFile($file)) {
+                $this->project->removeFile($file);
+            }
         }
+        $this->logger->completed();
 
-        /**
-         * @return bool
-         */
-        public function hasParseErrors() {
-            return count($this->parseErrors) > 0;
-        }
+        return $this->project;
+    }
 
-        /**
-         * @return array
-         */
-        public function getParseErrors() {
-            return $this->parseErrors;
-        }
+    public function hasParseErrors(): bool {
+        return \count($this->parseErrors) > 0;
+    }
 
-        /**
-         * @param FileInfo $file
-         *
-         * @throws CollectorException
-         * @throws \TheSeer\phpDox\ProgressLoggerException
-         *
-         * @return bool
-         */
-        private function processFile(SourceFile $file) {
-            try {
-                if ($file->getSize() === 0) {
-                    $this->logger->progress('processed');
-                    return true;
-                }
-                $result = $this->backend->parse($file, $this->publicOnly);
+    public function getParseErrors(): array {
+        return $this->parseErrors;
+    }
 
-                if ($result->hasClasses()) {
-                    foreach($result->getClasses() as $class) {
-                        $this->project->addClass($class);
-                    }
-                }
-                if ($result->hasInterfaces()) {
-                    foreach($result->getInterfaces() as $interface) {
-                        $this->project->addInterface($interface);
-                    }
-                }
-                if ($result->hasTraits()) {
-                    foreach($result->getTraits() as $trait) {
-                        $this->project->addTrait($trait);
-                    }
-                }
+    /**
+     * @param FileInfo $file
+     *
+     * @throws CollectorException
+     * @throws \TheSeer\phpDox\ProgressLoggerException
+     */
+    private function processFile(SourceFile $file): bool {
+        try {
+            if ($file->getSize() === 0) {
                 $this->logger->progress('processed');
-                return true;
-            } catch (ParseErrorException $e) {
-                $previous = $e->getPrevious();
-                $this->parseErrors[$file->getPathname()] = sprintf(
-                    '%s [%s:%d]',
-                    $previous->getMessage(),
-                    basename($previous->getFile()),
-                    $previous->getLine()
-                );
-                $this->logger->progress('failed');
-                return false;
-            } catch (\Exception $e) {
-                throw new CollectorException('Error while processing source file', CollectorException::ProcessingError, $e, $file);
-            }
-        }
 
+                return true;
+            }
+            $result = $this->backend->parse($file, $this->publicOnly);
+
+            if ($result->hasClasses()) {
+                foreach ($result->getClasses() as $class) {
+                    $this->project->addClass($class);
+                }
+            }
+
+            if ($result->hasInterfaces()) {
+                foreach ($result->getInterfaces() as $interface) {
+                    $this->project->addInterface($interface);
+                }
+            }
+
+            if ($result->hasTraits()) {
+                foreach ($result->getTraits() as $trait) {
+                    $this->project->addTrait($trait);
+                }
+            }
+            $this->logger->progress('processed');
+
+            return true;
+        } catch (ParseErrorException $e) {
+            $previous                                = $e->getPrevious();
+            $this->parseErrors[$file->getPathname()] = \sprintf(
+                '%s [%s:%d]',
+                $previous->getMessage(),
+                \basename($previous->getFile()),
+                $previous->getLine()
+            );
+            $this->logger->progress('failed');
+
+            return false;
+        } catch (\Exception $e) {
+            throw new CollectorException('Error while processing source file', CollectorException::ProcessingError, $e, $file);
+        }
     }
 }

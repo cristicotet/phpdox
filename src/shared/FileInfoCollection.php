@@ -1,76 +1,52 @@
-<?php
-namespace TheSeer\phpDox {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox;
+
+/**
+ * Class FileInfoCollection
+ */
+class FileInfoCollection implements \Iterator, \Countable {
+    /**
+     * @var FileInfo[]
+     */
+    private $data = [];
 
     /**
-     * Class FileInfoCollection
-     *
-     * @package TheSeer\phpDox
+     * @var int
      */
-    class FileInfoCollection implements \Iterator, \Countable {
+    private $pos = 0;
 
-        /**
-         * @var FileInfo[]
-         */
-        private $data = [];
-
-        /**
-         * @var int
-         */
-        private $pos = 0;
-
-        /**
-         * @param FileInfo $file
-         */
-        public function add(FileInfo $file) {
-            $this->data[] = $file;
-        }
-
-        /**
-         * @return FileInfo
-         * @throws \TheSeer\phpDox\FileInfoCollectionException
-         */
-        public function current() {
-            if (!isset($this->data[$this->pos])) {
-                throw new FileInfoCollectionException('Empty collection');
-            }
-            return $this->data[$this->pos];
-        }
-
-        /**
-         *
-         */
-        public function next() {
-            $this->pos++;
-        }
-
-        /**
-         * @return int
-         */
-        public function key() {
-            return $this->pos;
-        }
-
-        /**
-         * @return bool
-         */
-        public function valid() {
-            return $this->count() > $this->pos;
-        }
-
-        /**
-         *
-         */
-        public function rewind() {
-            $this->pos = 0;
-        }
-
-        /**
-         * @return int
-         */
-        public function count() {
-            return count($this->data);
-        }
-
+    public function add(FileInfo $file): void {
+        $this->data[] = $file;
     }
 
+    /**
+     * @throws \TheSeer\phpDox\FileInfoCollectionException
+     */
+    public function current(): FileInfo {
+        if (!isset($this->data[$this->pos])) {
+            throw new FileInfoCollectionException('Empty collection');
+        }
+
+        return $this->data[$this->pos];
+    }
+
+    public function next(): void {
+        $this->pos++;
+    }
+
+    public function key(): int {
+        return $this->pos;
+    }
+
+    public function valid(): bool {
+        return $this->count() > $this->pos;
+    }
+
+    public function rewind(): void {
+        $this->pos = 0;
+    }
+
+    public function count(): int {
+        return \count($this->data);
+    }
 }

@@ -1,7 +1,5 @@
-<?php
-namespace TheSeer\phpDox\Generator {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator;
 
-    class TraitObject extends ClassObject {
-    }
-
+class TraitObject extends ClassObject {
 }

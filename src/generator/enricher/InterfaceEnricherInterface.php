@@ -1,12 +1,8 @@
-<?php
-namespace TheSeer\phpDox\Generator\Enricher {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator\Enricher;
 
-    use TheSeer\phpDox\Generator\InterfaceStartEvent;
+use TheSeer\phpDox\Generator\InterfaceStartEvent;
 
-    interface InterfaceEnricherInterface extends EnricherInterface {
-
-        public function enrichInterface(InterfaceStartEvent $event);
-
-    }
-
+interface InterfaceEnricherInterface extends EnricherInterface {
+    public function enrichInterface(InterfaceStartEvent $event);
 }

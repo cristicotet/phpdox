@@ -1,10 +1,6 @@
-<?php
-namespace TheSeer\phpDox {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox;
 
-    class GeneratorConfigException extends ConfigException {
-
-        const BuilderNotFound = 1;
-
-    }
-
+class GeneratorConfigException extends ConfigException {
+    public const BuilderNotFound = 1;
 }

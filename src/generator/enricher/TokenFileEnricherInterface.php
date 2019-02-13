@@ -1,12 +1,8 @@
-<?php
-namespace TheSeer\phpDox\Generator\Enricher {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator\Enricher;
 
-    use TheSeer\phpDox\Generator\TokenFileStartEvent;
+use TheSeer\phpDox\Generator\TokenFileStartEvent;
 
-    interface TokenFileEnricherInterface extends EnricherInterface {
-
-        public function enrichTokenFile(TokenFileStartEvent $event);
-
-    }
-
+interface TokenFileEnricherInterface extends EnricherInterface {
+    public function enrichTokenFile(TokenFileStartEvent $event);
 }

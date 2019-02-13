@@ -1,14 +1,6 @@
-<?php
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator\Enricher;
 
-namespace TheSeer\phpDox\Generator\Enricher {
-
-    use TheSeer\fDOM\fDOMElement;
-    use TheSeer\phpDox\GeneratorConfig;
-
-    class PHPCsConfig extends CheckStyleConfig{
-
-        protected $defaultFileName = 'phpcs.xml';
-
-    }
-
+class PHPCsConfig extends CheckStyleConfig {
+    protected $defaultFileName = 'phpcs.xml';
 }

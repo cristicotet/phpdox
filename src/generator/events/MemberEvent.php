@@ -1,18 +1,14 @@
-<?php
-namespace TheSeer\phpDox\Generator {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator;
 
-    abstract class MemberEvent extends AbstractEvent {
+abstract class MemberEvent extends AbstractEvent {
+    private $member;
 
-        private $member;
-
-        public function __construct(MemberObject $member) {
-            $this->member = $member;
-        }
-
-        public function getMember() {
-            return $this->member;
-        }
-
+    public function __construct(MemberObject $member) {
+        $this->member = $member;
     }
 
+    public function getMember() {
+        return $this->member;
+    }
 }

@@ -1,10 +1,8 @@
-<?php
-namespace TheSeer\phpDox\DocBlock {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\DocBlock;
 
-    class GenericElementException extends \Exception {
+class GenericElementException extends \Exception {
+    public const MethodNotDefined = 1;
 
-        const MethodNotDefined = 1;
-        const PropertyNotDefined = 2;
-    }
-
+    public const PropertyNotDefined = 2;
 }

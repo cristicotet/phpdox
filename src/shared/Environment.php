@@ -1,56 +1,54 @@
-<?php
-namespace TheSeer\phpDox {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox;
 
-    class Environment {
+class Environment {
+    public function ensureFitness(): void {
+        $this->ensureTimezoneSet();
+        $this->ensureRequiredExtensionsLoaded();
+        $this->disableXDebug();
+    }
 
-        public function ensureFitness() {
-            $this->ensureTimezoneSet();
-            $this->ensureRequiredExtensionsLoaded();
-            $this->disableXDebug();
-        }
+    private function ensureRequiredExtensionsLoaded(): void {
+        $required = ['tokenizer', 'iconv', 'fileinfo', 'libxml', 'dom', 'xsl', 'mbstring', 'pcre'];
+        $missing  = [];
 
-        private function ensureRequiredExtensionsLoaded() {
-            $required = array('tokenizer', 'iconv', 'fileinfo', 'libxml', 'dom', 'xsl', 'mbstring','pcre');
-            $missing = array();
-
-            foreach ($required as $test) {
-                if (!extension_loaded($test)) {
-                    $missing[] = sprintf('ext/%s not installed/enabled', $test);
-                }
-            }
-
-            try {
-                $test = preg_replace( '/[\x{0430}-\x{04FF}]/iu', '', '-АБВГД-' );
-                if ($test != '--') {
-                    throw new \ErrorException('PCRE unicode support broken.');
-                }
-            } catch(\ErrorException $e) {
-                $missing[] = 'PCRE installation does not support unicode / unicode properties.';
-            }
-
-            if (count($missing)) {
-                throw new EnvironmentException(
-                    join("\n", $missing),
-                    EnvironmentException::ExtensionMissing
-                );
+        foreach ($required as $test) {
+            if (!\extension_loaded($test)) {
+                $missing[] = \sprintf('ext/%s not installed/enabled', $test);
             }
         }
 
-        private function disableXDebug() {
-            if (!extension_loaded('xdebug')) {
-                return;
+        try {
+            $test = \preg_replace('/[\x{0430}-\x{04FF}]/iu', '', '-АБВГД-');
+
+            if ($test != '--') {
+                throw new \ErrorException('PCRE unicode support broken.');
             }
-            ini_set('xdebug.scream', 0);
-            ini_set('xdebug.max_nesting_level', 8192);
-            ini_set('xdebug.show_exception_trace', 0);
-            xdebug_disable();
+        } catch (\ErrorException $e) {
+            $missing[] = 'PCRE installation does not support unicode / unicode properties.';
         }
 
-        private function ensureTimezoneSet() {
-            if (!ini_get('date.timezone')) {
-                date_default_timezone_set('UTC');
-            }
+        if (\count($missing)) {
+            throw new EnvironmentException(
+                \implode("\n", $missing),
+                EnvironmentException::ExtensionMissing
+            );
         }
     }
 
+    private function disableXDebug(): void {
+        if (!\extension_loaded('xdebug')) {
+            return;
+        }
+        \ini_set('xdebug.scream', 'off');
+        \ini_set('xdebug.max_nesting_level', '8192');
+        \ini_set('xdebug.show_exception_trace', 'off');
+        xdebug_disable();
+    }
+
+    private function ensureTimezoneSet(): void {
+        if (!\ini_get('date.timezone')) {
+            \date_default_timezone_set('UTC');
+        }
+    }
 }

@@ -1,16 +1,8 @@
-<?php
-namespace TheSeer\phpDox\Generator {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator;
 
-    class MemberCollection extends AbstractCollection {
-
-        /**
-         * @return MemberObject
-         */
-        public function current() {
-            return new MemberObject($this->getCurrentNode());
-        }
-
-
+class MemberCollection extends AbstractCollection {
+    public function current(): MemberObject {
+        return new MemberObject($this->getCurrentNode());
     }
-
 }

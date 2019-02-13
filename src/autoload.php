@@ -95,6 +95,7 @@ spl_autoload_register(
                 'theseer\\phpdox\\factoryinterface' => '/shared/FactoryInterface.php',
                 'theseer\\phpdox\\fileinfo' => '/shared/FileInfo.php',
                 'theseer\\phpdox\\fileinfocollection' => '/shared/FileInfoCollection.php',
+                'theseer\\phpdox\\fileinfocollectionexception' => '/shared/FileInfoCollectionException.php',
                 'theseer\\phpdox\\fileinfoexception' => '/shared/FileInfoException.php',
                 'theseer\\phpdox\\generator\\abstractclassevent' => '/generator/events/AbstractClassEvent.php',
                 'theseer\\phpdox\\generator\\abstractcollection' => '/generator/project/collections/AbstractCollection.php',

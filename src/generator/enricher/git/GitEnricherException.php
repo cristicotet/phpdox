@@ -1,11 +1,10 @@
-<?php
-namespace TheSeer\phpDox\Generator\Enricher {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator\Enricher;
 
-    class GitEnricherException extends EnricherException {
+class GitEnricherException extends EnricherException {
+    public const ExecDisabled = 1;
 
-        const ExecDisabled = 1;
-        const FetchingHistoryFailed = 2;
-        const GitVersionTooOld = 3;
-    }
+    public const FetchingHistoryFailed = 2;
 
+    public const GitVersionTooOld = 3;
 }

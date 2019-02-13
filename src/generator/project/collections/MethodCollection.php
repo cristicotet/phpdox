@@ -1,16 +1,8 @@
-<?php
-namespace TheSeer\phpDox\Generator {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator;
 
-    class MethodCollection extends AbstractCollection {
-
-        /**
-         * @return MethodObject
-         */
-        public function current() {
-            return new MethodObject($this->getCurrentNode());
-        }
-
-
+class MethodCollection extends AbstractCollection {
+    public function current(): MethodObject {
+        return new MethodObject($this->getCurrentNode());
     }
-
 }

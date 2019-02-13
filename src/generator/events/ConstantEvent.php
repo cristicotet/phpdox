@@ -1,18 +1,14 @@
-<?php
-namespace TheSeer\phpDox\Generator {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator;
 
-    abstract class ConstantEvent extends AbstractEvent {
+abstract class ConstantEvent extends AbstractEvent {
+    private $constant;
 
-        private $constant;
-
-        public function __construct(ConstantObject $constant) {
-            $this->constant = $constant;
-        }
-
-        public function getConstant() {
-            return $this->constant;
-        }
-
+    public function __construct(ConstantObject $constant) {
+        $this->constant = $constant;
     }
 
+    public function getConstant() {
+        return $this->constant;
+    }
 }

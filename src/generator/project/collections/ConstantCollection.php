@@ -1,16 +1,8 @@
-<?php
-namespace TheSeer\phpDox\Generator {
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Generator;
 
-    class ConstantCollection extends AbstractCollection {
-
-        /**
-         * @return ConstantObject
-         */
-        public function current() {
-            return new ConstantObject($this->getCurrentNode());
-        }
-
-
+class ConstantCollection extends AbstractCollection {
+    public function current(): ConstantObject {
+        return new ConstantObject($this->getCurrentNode());
     }
-
 }

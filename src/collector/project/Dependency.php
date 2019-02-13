@@ -1,92 +1,95 @@
-<?php
+<?php declare(strict_types = 1);
+namespace TheSeer\phpDox\Collector;
 
-namespace TheSeer\phpDox\Collector {
+use TheSeer\fDOM\fDOMDocument;
 
-    use TheSeer\fDOM\fDOMDocument;
+class Dependency {
+    /**
+     * @var fDOMDocument
+     */
+    private $index;
 
-    class Dependency {
+    /**
+     * @var Project
+     */
+    private $project;
 
-        /**
-         * @var fDOMDocument
-         */
-        private $index;
+    /**
+     * @var string
+     */
+    private $baseDir;
 
-        /**
-         * @var Project
-         */
-        private $project;
+    /**
+     * @var bool
+     */
+    private $publicOnlyMode;
 
-        /**
-         * @var string
-         */
-        private $baseDir;
+    public function __construct(fDOMDocument $dom, Project $project, $publicOnlyMode) {
+        $this->index   = $dom;
+        $this->baseDir = \dirname(\str_replace('file:/', '', \urldecode($dom->documentURI)));
+        $this->index->registerNamespace('phpdox', 'http://xml.phpdox.net/src');
+        $this->project        = $project;
+        $this->publicOnlyMode = $publicOnlyMode;
+    }
 
-        /**
-         * @var bool
-         */
-        private $publicOnlyMode;
+    public function getUnitByName($name) {
+        $parts     = \explode('\\', $name);
+        $local     = \array_pop($parts);
+        $namespace = \implode('\\', $parts);
+        $indexNode = $this->index->queryOne(
+            \sprintf('//phpdox:namespace[@name="%s"]/*[@name="%s"]', $namespace, $local)
+        );
 
-        public function __construct(fDOMDocument $dom, Project $project, $publicOnlyMode) {
-            $this->index = $dom;
-            $this->baseDir = dirname(urldecode($dom->documentURI));
-            $this->index->registerNamespace('phpdox', 'http://xml.phpdox.net/src');
-            $this->project = $project;
-            $this->publicOnlyMode = $publicOnlyMode;
+        if (!$indexNode) {
+            throw new DependencyException(
+                \sprintf("Unit '%s' not found", $name),
+                DependencyException::UnitNotFound
+            );
         }
 
-        public function getUnitByName($name) {
-            $parts = explode('\\', $name);
-            $local = array_pop($parts);
-            $namespace = join('\\', $parts);
-            $indexNode = $this->index->queryOne(
-                    sprintf('//phpdox:namespace[@name="%s"]/*[@name="%s"]', $namespace, $local));
+        $dom = new fDOMDocument();
+        $dom->load($this->baseDir . '/' . $indexNode->getAttribute('xml'));
 
-            if (!$indexNode) {
-                throw new DependencyException(
-                    sprintf("Unit '%s' not found", $name),
-                    DependencyException::UnitNotFound
-                );
+        if ($this->publicOnlyMode) {
+            foreach ($dom->query('//*[@visibility and not(@visibility = "public")]') as $node) {
+                $node->parentNode->removeChild($node);
             }
+        }
 
-            $dom = new fDOMDocument();
-            $dom->load( $this->baseDir . '/' . $indexNode->getAttribute('xml'));
-
-            if ($this->publicOnlyMode) {
-                foreach($dom->query('//*[@visibility and not(@visibility = "public")]') as $node) {
-                    $node->parentNode->removeChild($node);
-                }
-            }
-
-            switch ($indexNode->localName) {
-                case 'interface': {
+        switch ($indexNode->localName) {
+            case 'interface':
+                {
                     $unit = new InterfaceObject();
                     $unit->import($dom);
                     $this->project->addInterface($unit);
+
                     break;
                 }
-                case 'trait': {
+            case 'trait':
+                {
                     $unit = new TraitObject();
                     $unit->import($dom);
                     $this->project->addTrait($unit);
+
                     break;
                 }
-                case 'class': {
+            case 'class':
+                {
                     $unit = new ClassObject();
                     $unit->import($dom);
                     $this->project->addClass($unit);
+
                     break;
                 }
-                default: {
+            default:
+                {
                     throw new DependencyException(
-                        sprintf("Invalid unit type '%s'", $indexNode->localName),
+                        \sprintf("Invalid unit type '%s'", $indexNode->localName),
                         DependencyException::InvalidUnitType
                     );
                 }
-            }
-
-            return $unit;
         }
 
+        return $unit;
     }
-
 }
